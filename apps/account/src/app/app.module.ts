@@ -6,6 +6,9 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getPGConfig } from './configs/pg.config';
 import { UserModule } from './user/user.module';
+import { SessionModule } from './session/session.module';
+import { mongoConfig } from './configs/mongo.config';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
     imports: [
@@ -14,9 +17,11 @@ import { UserModule } from './user/user.module';
             envFilePath: "envs/account.env"
         }),
         TypeOrmModule.forRootAsync(getPGConfig()),
+        MongooseModule.forRootAsync(mongoConfig()),
         RMQModule.forRootAsync(getRMQConfig()),
         AuthModule,
-        UserModule
+        UserModule,
+        SessionModule
     ],
     exports: [TypeOrmModule]
 })

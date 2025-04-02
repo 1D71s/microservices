@@ -1,3 +1,3 @@
-export * from "./lib/common/IMessage";
-export * from "./lib/user/IUser";
-export * from "./lib/session/ITokens";
+export * from "./lib/common/message.interface";
+export * from "./lib/user/user.interface";
+export * from "./lib/session/tokens.interface";

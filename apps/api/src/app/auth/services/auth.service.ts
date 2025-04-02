@@ -14,7 +14,7 @@ export class AuthService {
         res.cookie("REFRESH_TOKEN", tokens.refreshToken, {
             httpOnly: true,
             sameSite: 'lax',
-            // expires: new Date(tokens.refreshToken.exp),
+            expires: new Date(tokens.refreshToken.exp),
             path: '/'
         })
 
