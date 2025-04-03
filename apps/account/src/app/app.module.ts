@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { SessionModule } from './session/session.module';
 import { mongoConfig } from './configs/mongo.config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
     imports: [
@@ -21,7 +22,8 @@ import { MongooseModule } from '@nestjs/mongoose';
         RMQModule.forRootAsync(getRMQConfig()),
         AuthModule,
         UserModule,
-        SessionModule
+        SessionModule,
+        RedisModule
     ],
     exports: [TypeOrmModule]
 })

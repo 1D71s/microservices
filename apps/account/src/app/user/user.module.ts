@@ -5,18 +5,22 @@ import { UserRepository } from './repositories/user.repository';
 import { UserQueries } from './controllers/user.queries';
 import { SessionModule } from '../session/session.module';
 import { UserService } from './services/user.service';
+import { RedisModule } from '@nestjs-modules/ioredis';
+import { RedisService } from '../redis/service/redis.service';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([
             UserEntity
         ]),
-        SessionModule
+        SessionModule,
+        RedisModule
     ],
     controllers: [
         UserQueries
     ],
     providers: [
+        RedisService,
         UserService,
         UserRepository
     ],

@@ -29,8 +29,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             }
         );
 
-        console.log(data);
-
         if (!data.userId || data.userId !== payload.id) {
             throw new UnauthorizedException("Access denied. User account not found.");
         }

@@ -7,6 +7,8 @@ import { AuthService } from './services/auth.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from '../user/user.module';
 import { SessionModule } from '../session/session.module';
+import { RedisService } from '../redis/service/redis.service';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
     imports: [
@@ -22,9 +24,11 @@ import { SessionModule } from '../session/session.module';
             }),
         }),
         UserModule,
-        SessionModule
+        SessionModule,
+        RedisModule
     ],
     providers: [
+        RedisService,
         AuthService,
     ],
     controllers: [

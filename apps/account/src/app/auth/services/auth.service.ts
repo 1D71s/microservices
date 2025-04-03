@@ -4,9 +4,11 @@ import { AccountLogin, AccountLogout, AccountRegister, AccountUpdateTokens } fro
 import * as bcrypt from 'bcrypt';
 import { RMQError } from 'nestjs-rmq';
 import { ERROR_TYPE } from 'nestjs-rmq/dist/constants';
-import { IRefreshToken, ITokens, IUser, UserProvider } from '@interface';
+import { ITokens, IUser, UserProvider } from '@interface';
 import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../session/services/session.service';
+import { RedisService } from '../../redis/service/redis.service';
+import { UserSessionsEnumKey } from '../../user/enums/user_sessions.enum';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +16,7 @@ export class AuthService {
         private readonly userRepository: UserRepository,
         private readonly jwtService: JwtService,
         private readonly sessionService: SessionService,
+        private readonly redisService: RedisService
     ) {}
 
     async register(dto: AccountRegister.Request): Promise<{ message: string }> {
@@ -47,12 +50,12 @@ export class AuthService {
             throw new RMQError('Incorrect email or password.', ERROR_TYPE.RMQ, 401);
         }
 
-        return this.generateTokens(existingUser, agent);
+        return await this.generateTokens(existingUser, agent);
     }
 
     async updateTokens(dto: AccountUpdateTokens.Request): Promise<ITokens> {
         const { refreshToken, agent } = dto;
-        
+
         const token = await this.sessionService.getOneByToken(refreshToken.token);
         
         if (!token) {
@@ -76,6 +79,11 @@ export class AuthService {
     
     async deleteRefreshToken(dto: AccountLogout.Request): Promise<AccountLogout.Response> {
         const { refreshToken } = dto;
+
+        const cacheKey = `${UserSessionsEnumKey.USER_SESSIONS}:${dto.refreshToken.userId}`;
+
+        await this.redisService.delete(cacheKey);
+
         const deletedToken = await this.sessionService.deleteToken(refreshToken);
 
         if (!deletedToken) {
@@ -87,7 +95,13 @@ export class AuthService {
 
     private async generateTokens(user: IUser, agent: string): Promise<ITokens> {
         const refreshToken = await this.sessionService.getOrUpdateRefreshToken(user.id, agent);
-        
+
+        const cacheKey = `${UserSessionsEnumKey.USER_SESSIONS}:${user.id}`;
+
+        await this.redisService.set(cacheKey, refreshToken.token, {
+            EX: 604800
+        });
+          
         const accessToken = this.jwtService.sign({
             id: user.id,
             email: user.email,
