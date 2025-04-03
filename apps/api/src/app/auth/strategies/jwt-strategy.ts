@@ -21,7 +21,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: IJwtPayloadUser) {
-        console.log(payload);
         const data = await this.rmqService.send<AccountGetSession.Request, AccountGetSession.Response>(
             AccountGetSession.topic, 
             { 
