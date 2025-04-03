@@ -1,4 +1,4 @@
-import { IAccessToken, ITokens } from '@interface';
+import { IAccessToken, ITokens, RefreshTokenEnum } from '@interface';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Response } from "express";
 
@@ -11,7 +11,7 @@ export class AuthService {
             throw new UnauthorizedException()
         }
 
-        res.cookie("REFRESH_TOKEN", tokens.refreshToken, {
+        res.cookie(RefreshTokenEnum.REFRESH_TOKEN, tokens.refreshToken, {
             httpOnly: true,
             sameSite: 'lax',
             expires: new Date(tokens.refreshToken.exp),

@@ -1,7 +1,7 @@
 export interface IRefreshToken {
     token: string;
     exp: Date;
-    userId: string;
+    userId: number;
     userAgent: string;
 }
 

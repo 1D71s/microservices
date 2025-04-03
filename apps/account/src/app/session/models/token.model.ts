@@ -11,7 +11,7 @@ export class Token extends Document implements IRefreshToken {
     exp: Date;
 
     @Prop({ required: true })
-    userId: string;
+    userId: number;
 
     @Prop({ required: true })
     userAgent: string;

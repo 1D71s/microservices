@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../../user/repositories/user.repository';
-import { AccountLogin, AccountRegister } from '@contracts';
+import { AccountLogin, AccountLogout, AccountRegister, AccountUpdateTokens } from '@contracts';
 import * as bcrypt from 'bcrypt';
 import { RMQError } from 'nestjs-rmq';
 import { ERROR_TYPE } from 'nestjs-rmq/dist/constants';
-import { ITokens, IUser, UserProvider } from '@interface';
+import { IRefreshToken, ITokens, IUser, UserProvider } from '@interface';
 import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../session/services/session.service';
 
@@ -38,7 +38,7 @@ export class AuthService {
     async login(dto: AccountLogin.Request): Promise<AccountLogin.Response> {
         const { email, password, agent } = dto;
 
-        const existingUser = await this.userRepository.findByEmail(email);
+        const existingUser = await this.userRepository.findByEmail(email, { includePassword: true });
         if (!existingUser) {
             throw new RMQError('User was not found', ERROR_TYPE.RMQ, 404);
         }
@@ -50,8 +50,43 @@ export class AuthService {
         return this.generateTokens(existingUser, agent);
     }
 
+    async updateTokens(dto: AccountUpdateTokens.Request): Promise<ITokens> {
+        const { refreshToken, agent } = dto;
+        
+        const token = await this.sessionService.getOneByToken(refreshToken.token);
+        
+        if (!token) {
+            throw new RMQError('Refresh token was not found', ERROR_TYPE.RMQ, 404);
+        }
+    
+        if (new Date(token.exp) < new Date()) {
+            throw new RMQError('Refresh token has expired', ERROR_TYPE.RMQ, 401);
+        }
+        
+        await this.sessionService.deleteToken(token);
+        
+        const user = await this.userRepository.findById(token.userId);
+        
+        if (!user) {
+            throw new RMQError('User associated with this token was not found', ERROR_TYPE.RMQ, 404);
+        }
+    
+        return this.generateTokens(user, agent);
+    }   
+    
+    async deleteRefreshToken(dto: AccountLogout.Request): Promise<AccountLogout.Response> {
+        const { refreshToken } = dto;
+        const deletedToken = await this.sessionService.deleteToken(refreshToken);
+
+        if (!deletedToken) {
+            throw new RMQError('Refresh token was not found', ERROR_TYPE.RMQ, 404);
+        }
+
+        return { result: true };
+    }
+
     private async generateTokens(user: IUser, agent: string): Promise<ITokens> {
-        const refreshToken = await this.sessionService.getOrUpdateRefreshToken(String(user.id), agent);
+        const refreshToken = await this.sessionService.getOrUpdateRefreshToken(user.id, agent);
         
         const accessToken = this.jwtService.sign({
             id: user.id,

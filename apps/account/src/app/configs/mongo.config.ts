@@ -17,7 +17,7 @@ const getMongoUri = (configService: ConfigService): string => {
     const host = configService.get<string>('MONGO_HOST');
     const port = configService.get<number>('MONGO_PORT');
     const database = configService.get<string>('MONGO_DATABASE');
-    const authSource = configService.get<string>('MONGO_AUTHDATABASE', 'admin');
+    const authSource = configService.get<string>('MONGO_AUTHDATABASE');
 
     return `mongodb://${login}:${password}@${host}:${port}/${database}?authSource=${authSource}`;
 };

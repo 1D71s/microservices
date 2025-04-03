@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { ConfigService } from '@nestjs/config';
 import { RMQExceptionFilter } from './app/common/exceptions/rmq-exception';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -19,7 +20,9 @@ async function bootstrap() {
     app.useGlobalFilters(new RMQExceptionFilter());
 
     const configService = app.get(ConfigService);
-    const port = configService.get<number>('PORT') || 3000;     
+    const port = configService.get<number>('PORT') || 3000;   
+
+    app.use(cookieParser());
     
     await app.listen(port);
     Logger.log(

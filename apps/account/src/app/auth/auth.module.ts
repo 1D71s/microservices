@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthController } from './controllers/auth.controller';
+import { AuthCommands } from './controllers/auth.commands';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthService } from './services/auth.service';
-import { UserRepository } from '../user/repositories/user.repository';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SessionService } from '../session/services/session.service';
 import { UserModule } from '../user/user.module';
+import { SessionModule } from '../session/session.module';
 
 @Module({
     imports: [
@@ -22,13 +21,14 @@ import { UserModule } from '../user/user.module';
                 signOptions: { expiresIn: '5m' },
             }),
         }),
-        UserModule
+        UserModule,
+        SessionModule
     ],
     providers: [
         AuthService,
     ],
     controllers: [
-        AuthController
+        AuthCommands
     ],
 })
 export class AuthModule {}

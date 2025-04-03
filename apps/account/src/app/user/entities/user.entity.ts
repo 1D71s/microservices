@@ -13,7 +13,7 @@ export class UserEntity implements IUser {
     @Column({ select: false })
     password: string;
 
-    @Column({ type: 'enum', enum: UserProvider, nullable: false })
+    @Column({ type: 'enum', enum: UserProvider, nullable: false, default: 'local' })
     provider: UserProvider;
 
     @CreateDateColumn({ type: 'timestamp' })

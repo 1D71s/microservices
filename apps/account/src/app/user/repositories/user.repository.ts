@@ -28,4 +28,8 @@ export class UserRepository {
     async create(dto: IUserCreateDTO): Promise<UserEntity> {
         return this.repository.save(dto);
     }
+
+    async findById(id: number): Promise<UserEntity | null> {
+        return this.repository.findOneBy({ id }); 
+    }
 }

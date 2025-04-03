@@ -19,7 +19,7 @@ import { APP_GUARD } from '@nestjs/core';
             limit: 3,
         }]),
         AuthModule
-    ],
+   ],
     providers: [
         {
             provide: APP_GUARD,
