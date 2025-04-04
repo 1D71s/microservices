@@ -17,6 +17,6 @@ export namespace AccountGetSession {
     export class Response {
         userId!: number;
 
-        sessions!: IRefreshToken[];
+        token!: string;
     }
 }

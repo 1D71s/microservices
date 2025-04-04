@@ -17,12 +17,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
             secretOrKey: secretKey,
+            passReqToCallback: true,
         });
     }
 
     async validate(req: Request, payload: IJwtPayloadUser) {
         const userAgent = req.headers['user-agent'];
-
+    
         const data = await this.rmqService.send<AccountGetSession.Request, AccountGetSession.Response>(
             AccountGetSession.topic, 
             { 
@@ -31,14 +32,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             }
         );
 
-        if (!data.userId || data.userId !== payload.id) {
-            throw new UnauthorizedException("Access denied. User account not found.");
+        if (!data) {
+            throw new UnauthorizedException('Session not found');
         }
-
-        if (!data.sessions.some(session => session.token === payload.session)) {
-            throw new UnauthorizedException("Session does not exist.");
+    
+        const { userId, token } = data;
+    
+        if (userId !== payload.id || token !== payload.session) {
+            throw new UnauthorizedException('Session does not match');
         }
-
-        return payload
-    }
+    
+        return payload;
+    }    
 }

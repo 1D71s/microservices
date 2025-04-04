@@ -15,7 +15,9 @@ import { SessionService } from './services/session.service';
         SessionService
     ],
     exports: [
-        SessionService
+        SessionService,
+        TokenRepository,
+        MongooseModule
     ]
 })
 export class SessionModule {}

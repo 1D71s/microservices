@@ -9,6 +9,7 @@ import { UserModule } from '../user/user.module';
 import { SessionModule } from '../session/session.module';
 import { RedisService } from '../redis/service/redis.service';
 import { RedisModule } from '../redis/redis.module';
+import { TokenRepository } from '../session/repositories/token.repository';
 
 @Module({
     imports: [

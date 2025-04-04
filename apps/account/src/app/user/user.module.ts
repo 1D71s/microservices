@@ -14,7 +14,7 @@ import { RedisService } from '../redis/service/redis.service';
             UserEntity
         ]),
         SessionModule,
-        RedisModule
+        RedisModule,
     ],
     controllers: [
         UserQueries
