@@ -20,11 +20,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: IJwtPayloadUser) {
+    async validate(req: Request, payload: IJwtPayloadUser) {
+        const userAgent = req.headers['user-agent'];
+
         const data = await this.rmqService.send<AccountGetSession.Request, AccountGetSession.Response>(
             AccountGetSession.topic, 
             { 
                 id: payload.id,
+                agent: userAgent,
             }
         );
 

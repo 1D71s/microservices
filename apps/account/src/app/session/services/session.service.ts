@@ -10,8 +10,8 @@ export class SessionService {
         private readonly tokensRepository: TokenRepository
     ) {}
 
-    async getSessionsByUserId(userId: number): Promise<Token[]> {
-        return await this.tokensRepository.getSessionsByUserId(userId);
+    async getSessionsByUserId(userId: number, agent: string): Promise<Token[]> {
+        return await this.tokensRepository.getSessionsByUserId(userId, agent);
     }
 
     async getOneByToken(token: string): Promise<Token | null> {

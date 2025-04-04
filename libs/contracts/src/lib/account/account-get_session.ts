@@ -1,5 +1,5 @@
 import { IRefreshToken } from "@interface";
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export namespace AccountGetSession {
     export const topic = 'account.get-session.command';
@@ -8,6 +8,10 @@ export namespace AccountGetSession {
         @IsNumber()
         @IsNotEmpty()
         id!: number;
+
+        @IsString()
+        @IsNotEmpty()
+        agent!: string;
     }
 
     export class Response {

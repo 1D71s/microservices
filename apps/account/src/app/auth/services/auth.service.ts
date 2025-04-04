@@ -56,7 +56,7 @@ export class AuthService {
     async updateTokens(dto: AccountUpdateTokens.Request): Promise<ITokens> {
         const { refreshToken, agent } = dto;
 
-        await this.removeSessionFromCache(dto.refreshToken.userId, refreshToken.token);
+        await this.removeSessionFromCache(dto.refreshToken.userId, refreshToken.userAgent);
 
         const token = await this.sessionService.getOneByToken(refreshToken.token);
         
@@ -82,7 +82,7 @@ export class AuthService {
     async deleteRefreshToken(dto: AccountLogout.Request): Promise<AccountLogout.Response> {
         const { refreshToken } = dto;
 
-        await this.removeSessionFromCache(dto.refreshToken.userId, refreshToken.token);
+        await this.removeSessionFromCache(dto.refreshToken.userId, refreshToken.userAgent);
 
         const deletedToken = await this.sessionService.deleteToken(refreshToken);
 
@@ -96,7 +96,7 @@ export class AuthService {
     private async generateTokens(user: IUser, agent: string): Promise<ITokens> {
         const refreshToken = await this.sessionService.getOrUpdateRefreshToken(user.id, agent);
 
-        await this.addSessionToCache(user.id, refreshToken.token);
+        await this.addSessionToCache(user.id, refreshToken.token, agent);
           
         const accessToken = this.jwtService.sign({
             id: user.id,
@@ -107,38 +107,14 @@ export class AuthService {
         return { accessToken, refreshToken };
     }
 
-    private async addSessionToCache(userId: number, sessionToken: string): Promise<void> {
-        const cacheKey = `${UserSessionsEnumKey.USER_SESSIONS}:${userId}`;
+    private async addSessionToCache(userId: number, sessionToken: string, agent: string): Promise<void> {
+        const cacheKey = `${UserSessionsEnumKey.USER_SESSIONS}_${agent}:${userId}`;
         
-        const cachedSessions = await this.redisService.get(cacheKey);
-        
-        let sessions = [];
-        if (cachedSessions) {
-            sessions = JSON.parse(cachedSessions);
-        }
-    
-        sessions.push({ token: sessionToken, createdAt: new Date().toISOString() });
-    
-        await this.redisService.set(cacheKey, JSON.stringify(sessions), { EX: 604800 });
+        await this.redisService.set(cacheKey, sessionToken, { EX: 604800 });
     }
 
-    async removeSessionFromCache(userId: number, sessionToken: string): Promise<void> {
-        const cacheKey = `${UserSessionsEnumKey.USER_SESSIONS}:${userId}`;
-    
-        const cachedSessions = await this.redisService.get(cacheKey);
-        
-        if (!cachedSessions) {
-            return;
-        }
-    
-        const sessions = JSON.parse(cachedSessions);
-    
-        const updatedSessions = sessions.filter(session => session.token !== sessionToken);
-    
-        if (updatedSessions.length > 0) {
-            await this.redisService.set(cacheKey, JSON.stringify(updatedSessions), { EX: 604800 });
-        } else {
-            await this.redisService.delete(cacheKey);
-        }
+    async removeSessionFromCache(userId: number, agent: string): Promise<void> {
+        const cacheKey = `${UserSessionsEnumKey.USER_SESSIONS}_${agent}:${userId}`;
+        await this.redisService.delete(cacheKey);
     }    
 }

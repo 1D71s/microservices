@@ -15,8 +15,9 @@ export class UserService {
         private readonly redisService: RedisService
     ) {}
 
-    async getUserSessions(userId: number): Promise<AccountGetSession.Response> {
-        const cacheKey = `${UserSessionsEnumKey.USER_SESSIONS}:${userId}`;
+    async getUserSessions(dto: AccountGetSession.Request): Promise<AccountGetSession.Response> {
+        const { id, agent } = dto;
+        const cacheKey = `${UserSessionsEnumKey.USER_SESSIONS}_${agent}:${id}`;
 
         const cachedSessions = await this.redisService.get(cacheKey);
 
@@ -24,21 +25,21 @@ export class UserService {
             try {
                 const sessions = JSON.parse(cachedSessions);
                 return {
-                    userId: userId,
+                    userId: id,
                     sessions,
                 };
             } catch (error) {
-                await this.redisService.delete(userId.toString());
+                await this.redisService.delete(cacheKey);
             }
         }
 
-        const user = await this.userRepository.findById(userId);
+        const user = await this.userRepository.findById(id);
 
         if (!user) {
             throw new RMQError('User was not found', ERROR_TYPE.RMQ, 404);
         }
 
-        const sessions = await this.sessionService.getSessionsByUserId(user.id);
+        const sessions = await this.sessionService.getSessionsByUserId(user.id, agent);
 
         return {
             userId: user.id,

@@ -12,8 +12,8 @@ export class TokenRepository {
         @InjectModel(Token.name) private readonly tokenModel: Model<Token>
     ) {}
 
-    async getSessionsByUserId(userId: number): Promise<Token[]> {
-        return await this.tokenModel.find({ userId }).exec(); 
+    async getSessionsByUserId(userId: number, userAgent: string): Promise<Token[]> {
+        return await this.tokenModel.find({ userId, userAgent }).exec(); 
     }
 
     async getOneByToken(token: string): Promise<Token | null> {

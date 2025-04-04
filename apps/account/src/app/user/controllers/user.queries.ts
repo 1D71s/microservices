@@ -11,7 +11,7 @@ export class UserQueries {
     
     @RMQValidate()
     @RMQRoute(AccountGetSession.topic)
-    async getUserWithSession(@Body() dto: AccountGetSession.Request): Promise<AccountGetSession.Response> {
-        return await this.userService.getUserSessions(dto.id);
+    async getUserWithSession(@Body() dto: AccountGetSession.Request ): Promise<AccountGetSession.Response> {
+        return await this.userService.getUserSessions(dto);
     }
 }
